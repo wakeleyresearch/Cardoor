@@ -15,6 +15,19 @@
 .cxx
 local.properties
 .env
-debug.keystore
 *-debug.log
 
+
+# Secrets
+.env.*
+!.env.example
+*.jks
+*.keystore
+!debug.keystore
+keystore.properties
+google-services.json
+GoogleService-Info.plist
+serviceAccount*.json
+*.pem
+*.p12
+*.key

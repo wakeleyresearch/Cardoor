@@ -1,0 +1,79 @@
+<resources>
+    <string name="app_name">FolioGraph</string>
+
+    <!-- Accessibility & Content Descriptions -->
+    <string name="cd_app_emblem">FolioGraph editorial mark</string>
+    <string name="cd_import_document">Import document or scan</string>
+    <string name="cd_sign_out">Sign out of workspace</string>
+    <string name="cd_toggle_theme">Toggle dark or light reading theme</string>
+    <string name="cd_play_audio">Play prosody narration</string>
+    <string name="cd_stop_audio">Stop prosody narration</string>
+    <string name="cd_delete_document">Delete document</string>
+    <string name="cd_add_annotation">Add stand-off annotation</string>
+    <string name="cd_reseed_section">Trigger memoryless cloud reseed</string>
+    <string name="cd_close_sheet">Close panel</string>
+
+    <!-- Auth Screen -->
+    <string name="signin_subtitle">Cloud-attested neuro-symbolic library, DITA/RDF verification, and reflowable editorial reader.</string>
+    <string name="signin_feat_provenance_title">Cloud-Verified Provenance</string>
+    <string name="signin_feat_provenance_desc">SHA-256 source digests paired with App Check attested Gemini OCR and server-timestamped Firestore ledgers.</string>
+    <string name="signin_feat_markov_title">Markovian Pipeline &amp; Feedback Inhibition</string>
+    <string name="signin_feat_markov_desc">Strict Truth Blanket isolation and Parsing Sidecar drift guards block Bayesian false belief updating.</string>
+    <string name="signin_feat_rbac_title">OAuth2 &amp; Zero-Trust RBAC</string>
+    <string name="signin_feat_rbac_desc">Google Sign-In via Credential Manager with offline-resilient Firestore sync and append-only audit logs.</string>
+    <string name="signin_google_cta">Sign in with Google</string>
+    <string name="signin_checking">Checking Google session…</string>
+    <string name="signin_signing_in">Authenticating with Google…</string>
+
+    <!-- Navigation Destinations -->
+    <string name="nav_library">Library</string>
+    <string name="nav_reader">Reader</string>
+    <string name="nav_prosody">Prosody</string>
+    <string name="nav_pipeline">Pipeline</string>
+
+    <!-- Library Screen -->
+    <string name="library_title">Editorial Library</string>
+    <string name="library_search_hint">Search titles, digests, or topics…</string>
+    <string name="library_import_cta">Ingest</string>
+    <string name="library_empty_title">Your Cloud Archive is Ready</string>
+    <string name="library_empty_body">Import a PDF, EPUB, or MOBI document, scan a page image for cloud OCR, or run the canonical DITA 1.3 specification through the Markovian pipeline.</string>
+    <string name="library_empty_cta">Import or Run Reference Spec</string>
+    <string name="sheet_import_title">Cloud-Attested Ingestion</string>
+    <string name="sheet_import_subtitle">Files unpack into deterministic DITA blocks, compute a SHA-256 source digest, and route through App Check attested Gemini synthesis.</string>
+    <string name="sheet_pick_file_title">PDF, EPUB, or MOBI Document</string>
+    <string name="sheet_pick_file_desc">Zero-permission Storage Access Framework picker</string>
+    <string name="sheet_pick_image_title">Scanned Page Photo (Cloud OCR)</string>
+    <string name="sheet_pick_image_desc">Zero-permission Android Photo Picker multimodal OCR</string>
+    <string name="sheet_ref_spec_title">Canonical DITA 1.3 Markovian Spec</string>
+    <string name="sheet_ref_spec_desc">Run live cloud synthesis, sidecar DoF check, and provenance commit</string>
+
+    <!-- Reader Screen -->
+    <string name="reader_empty_title">Select a Document from Library</string>
+    <string name="reader_empty_body">Open any cloud-verified folio from your Library shelf to read reflowed prose, inspect DITA 1.3 XML, browse RDF triples, or attach W3C stand-off notes.</string>
+    <string name="reader_tab_reflow">Reflow</string>
+    <string name="reader_tab_dita">DITA XML</string>
+    <string name="reader_tab_rdf">RDF Graph</string>
+    <string name="reader_tab_receipt">Receipt</string>
+    <string name="reader_annotate_cta">Annotate</string>
+    <string name="reader_reseed_cta">Cloud Reseed</string>
+    <string name="reader_listen_cta">Listen</string>
+
+    <!-- Prosody Screen -->
+    <string name="prosody_title">Prosody &amp; Style Studio</string>
+    <string name="prosody_subtitle">SSML spoken-cadence compiler operating strictly inside the sealed Markov Blanket.</string>
+    <string name="prosody_play_all">Play Narration</string>
+    <string name="prosody_stop">Stop</string>
+
+    <!-- Pipeline Screen -->
+    <string name="pipeline_title">Markovian Pipeline &amp; Sidecar</string>
+    <string name="pipeline_subtitle">Elastic Divergence → Convergence topology with Feedback Inhibition Control.</string>
+    <string name="pipeline_simulate_drift">Test Drift &amp; Feedback Inhibition</string>
+    <string name="pipeline_replay_checkpoint">Replay From Frozen Blanket</string>
+    <string name="pipeline_audit_heading">Immutable Historical Audit Ledger</string>
+    <string name="pipeline_arch_heading">REST API &amp; Replication Latency Playbook</string>
+    <string name="pipeline_sidecar_hash_heading">Local Sidecar vs. Firestore Hash</string>
+    <string name="pipeline_compare_flag_cta">Compare &amp; Flag Drift</string>
+    <string name="pipeline_simulate_file_drift_cta">Simulate File Drift</string>
+    <string name="pipeline_restore_sidecar_cta">Restore Sidecar From Cloud TruthManifest</string>
+    <string name="status_drift_flagged">Drift Flagged</string>
+</resources>

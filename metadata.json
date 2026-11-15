@@ -1,0 +1,6 @@
+{
+  "name": "FolioGraph",
+  "description": "Cloud-attested neuro-symbolic library manager and reflowable reader for PDF, EPUB, MOBI, and OCR documents with DITA/RDF verification, parsing sidecar drift guard, and SSML prosody playback.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

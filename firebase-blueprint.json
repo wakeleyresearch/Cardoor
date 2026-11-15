@@ -1,0 +1,481 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated user workspace profile with RBAC role and optional cloud REST gateway preferences.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the workspace owner."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name."
+        },
+        "email": {
+          "type": "string",
+          "description": "User email from Google OAuth2."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["curator", "editor", "reader"],
+          "description": "RBAC workspace role."
+        },
+        "cloudRestEndpoint": {
+          "type": "string",
+          "description": "Optional external Cloud REST ingestion endpoint URL."
+        },
+        "preferredTheme": {
+          "type": "string",
+          "enum": ["system", "light", "dark"],
+          "description": "Editorial reader theme preference."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp written via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp written via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": ["userId", "displayName", "email", "role", "preferredTheme", "createdAt", "updatedAt"]
+    },
+    "LibraryDocument": {
+      "title": "LibraryDocument",
+      "description": "Cloud-attested ingested document root with SHA-256 source digest, Markovian Truth Manifest hash, and verification metrics.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID."
+        },
+        "title": {
+          "type": "string",
+          "description": "Document title."
+        },
+        "author": {
+          "type": "string",
+          "description": "Document author or origin."
+        },
+        "sourceFormat": {
+          "type": "string",
+          "enum": ["PDF", "EPUB", "MOBI", "OCR_IMAGE", "MARKDOWN_DITA"],
+          "description": "Original ingested file format."
+        },
+        "ditaTopicType": {
+          "type": "string",
+          "enum": ["concept", "task", "reference"],
+          "description": "Normalized DITA 1.3 topic archetype."
+        },
+        "sourceDigest": {
+          "type": "string",
+          "description": "Canonical SHA-256 digest of the source document bytes."
+        },
+        "provenanceStatus": {
+          "type": "string",
+          "enum": ["CLOUD_VERIFIED", "PENDING_ATTESTATION", "RESEED_REQUIRED", "ERROR"],
+          "description": "Cloud provenance verification state."
+        },
+        "attestedModel": {
+          "type": "string",
+          "description": "Cloud AI model identifier that attested synthesis."
+        },
+        "truthManifestHash": {
+          "type": "string",
+          "description": "SHA-256 hash of the sealed Markovian Truth Manifest."
+        },
+        "merkleRootHash": {
+          "type": "string",
+          "description": "Merkle lineage root hash across patches 01-06."
+        },
+        "shaclScore": {
+          "type": "number",
+          "description": "Deterministic SHACL structural validation score (0.0 to 1.0)."
+        },
+        "dofScore": {
+          "type": "number",
+          "description": "Aggregate Parsing Sidecar degrees-of-freedom drift score (0.0 to 1.0)."
+        },
+        "bayesianFeedbackBlocked": {
+          "type": "boolean",
+          "description": "Invariant flag confirming output-to-prior Bayesian false belief updating is blocked."
+        },
+        "sectionCount": {
+          "type": "integer",
+          "description": "Number of verified section chunks."
+        },
+        "tripleCount": {
+          "type": "integer",
+          "description": "Number of extracted RDF triples."
+        },
+        "summary": {
+          "type": "string",
+          "description": "Grounded editorial abstract."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp written via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp written via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "userId",
+        "title",
+        "author",
+        "sourceFormat",
+        "ditaTopicType",
+        "sourceDigest",
+        "provenanceStatus",
+        "attestedModel",
+        "truthManifestHash",
+        "merkleRootHash",
+        "shaclScore",
+        "dofScore",
+        "bayesianFeedbackBlocked",
+        "sectionCount",
+        "tripleCount",
+        "summary",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "DocumentSection": {
+      "title": "DocumentSection",
+      "description": "Bounded reflowable section with DITA 1.3 XML, SSML prosody script, deterministic URN, and Parsing Sidecar locus telemetry.",
+      "type": "object",
+      "properties": {
+        "documentId": {
+          "type": "string",
+          "description": "Parent document ID."
+        },
+        "orderIndex": {
+          "type": "integer",
+          "description": "Sequential section position."
+        },
+        "title": {
+          "type": "string",
+          "description": "Section heading."
+        },
+        "plainText": {
+          "type": "string",
+          "description": "Reflowed readable editorial text."
+        },
+        "ditaXml": {
+          "type": "string",
+          "description": "Normalized DITA 1.3 XML fragment."
+        },
+        "ssmlProsody": {
+          "type": "string",
+          "description": "Compiled SSML prosody cues for spoken-cadence register."
+        },
+        "urn": {
+          "type": "string",
+          "description": "Deterministic SHA-256 URN identifier."
+        },
+        "sourceSpan": {
+          "type": "string",
+          "description": "Provenance page or byte span in source."
+        },
+        "locusChecksum": {
+          "type": "string",
+          "description": "Immutable source locus fingerprint."
+        },
+        "provenanceChainHash": {
+          "type": "string",
+          "description": "Merkle transition chain hash for this section."
+        },
+        "dofScore": {
+          "type": "number",
+          "description": "Parsing Sidecar degrees-of-freedom metric (0.0 to 1.0)."
+        },
+        "locusDriftDistance": {
+          "type": "number",
+          "description": "Lexical and structural drift distance from source locus."
+        },
+        "reseedCount": {
+          "type": "integer",
+          "description": "Number of memoryless sidecar reseeds executed."
+        },
+        "sidecarStatus": {
+          "type": "string",
+          "enum": ["CLOUD_LOCUS_LOCKED", "RESEEDED", "PENDING_CLOUD_ATTESTATION", "FALLBACK_LITERAL"],
+          "description": "Parsing Sidecar verification status."
+        },
+        "convergenceType": {
+          "type": "string",
+          "enum": ["DIRECT_PROJECTION", "CONJUNCTIVE_MERGE", "CONDITIONAL_GUARD", "SAFETY_OVERRIDE"],
+          "description": "Markovian Divergence-to-Convergence edge classification."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": [
+        "documentId",
+        "orderIndex",
+        "title",
+        "plainText",
+        "ditaXml",
+        "ssmlProsody",
+        "urn",
+        "sourceSpan",
+        "locusChecksum",
+        "provenanceChainHash",
+        "dofScore",
+        "locusDriftDistance",
+        "reseedCount",
+        "sidecarStatus",
+        "convergenceType",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "KnowledgeTriple": {
+      "title": "KnowledgeTriple",
+      "description": "W3C RDF 1.1 semantic triple anchored to a verified section URN and checked via SHACL.",
+      "type": "object",
+      "properties": {
+        "documentId": {
+          "type": "string",
+          "description": "Parent document ID."
+        },
+        "sectionId": {
+          "type": "string",
+          "description": "Anchored section ID."
+        },
+        "urn": {
+          "type": "string",
+          "description": "Deterministic SHA-256 triple URN."
+        },
+        "subject": {
+          "type": "string",
+          "description": "RDF subject term."
+        },
+        "predicate": {
+          "type": "string",
+          "description": "RDF predicate relation."
+        },
+        "objectValue": {
+          "type": "string",
+          "description": "RDF object value or URI."
+        },
+        "jsonLdContext": {
+          "type": "string",
+          "description": "JSON-LD context namespace URI."
+        },
+        "shaclStatus": {
+          "type": "string",
+          "enum": ["PASSED", "FLAGGED"],
+          "description": "Deterministic SHACL constraint outcome."
+        },
+        "confidence": {
+          "type": "number",
+          "description": "Grounding confidence score (0.0 to 1.0)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        }
+      },
+      "required": [
+        "documentId",
+        "sectionId",
+        "urn",
+        "subject",
+        "predicate",
+        "objectValue",
+        "jsonLdContext",
+        "shaclStatus",
+        "confidence",
+        "createdAt"
+      ]
+    },
+    "StandoffAnnotation": {
+      "title": "StandoffAnnotation",
+      "description": "W3C Web Annotation stand-off highlight and user note referencing character offsets in a section.",
+      "type": "object",
+      "properties": {
+        "documentId": {
+          "type": "string",
+          "description": "Parent document ID."
+        },
+        "sectionId": {
+          "type": "string",
+          "description": "Target section ID."
+        },
+        "startOffset": {
+          "type": "integer",
+          "description": "Character start offset."
+        },
+        "endOffset": {
+          "type": "integer",
+          "description": "Character end offset."
+        },
+        "selectedText": {
+          "type": "string",
+          "description": "Anchored verbatim excerpt."
+        },
+        "note": {
+          "type": "string",
+          "description": "User commentary note."
+        },
+        "tagColor": {
+          "type": "string",
+          "enum": ["TERRACOTTA", "SAGE", "OCHRE"],
+          "description": "Editorial highlight color tag."
+        },
+        "authorRole": {
+          "type": "string",
+          "enum": ["curator", "editor", "reader"],
+          "description": "Role of the annotating user."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": [
+        "documentId",
+        "sectionId",
+        "startOffset",
+        "endOffset",
+        "selectedText",
+        "note",
+        "tagColor",
+        "authorRole",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AuditLogEntry": {
+      "title": "AuditLogEntry",
+      "description": "Immutable append-only Markovian provenance and sidecar audit ledger record.",
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "INGEST",
+            "CLOUD_OCR_REFLOW",
+            "MARKOV_CHECKPOINT",
+            "SIDECAR_CHECK",
+            "SIDECAR_RESEED",
+            "SHACL_VERIFY",
+            "PROSODY_COMPILE",
+            "PROVENANCE_COMMIT",
+            "ROLE_CHECK"
+          ],
+          "description": "Audited pipeline or RBAC action."
+        },
+        "documentId": {
+          "type": "string",
+          "description": "Target document identifier."
+        },
+        "patchId": {
+          "type": "string",
+          "description": "Markovian patch identifier (e.g., patch-01 through patch-06)."
+        },
+        "sourceDigest": {
+          "type": "string",
+          "description": "Canonical SHA-256 source digest."
+        },
+        "inputStateHash": {
+          "type": "string",
+          "description": "Cryptographic SHA-256 hash of input state envelope."
+        },
+        "outputStateHash": {
+          "type": "string",
+          "description": "Cryptographic SHA-256 hash of output state envelope."
+        },
+        "truthManifestHash": {
+          "type": "string",
+          "description": "Invariant SHA-256 hash of sealed Truth Manifest."
+        },
+        "dofScore": {
+          "type": "number",
+          "description": "Node degrees-of-freedom score at checkpoint."
+        },
+        "bayesianFeedbackBlocked": {
+          "type": "boolean",
+          "description": "Confirms zero output-to-prior Bayesian belief updating."
+        },
+        "latencyMs": {
+          "type": "integer",
+          "description": "Execution duration in milliseconds."
+        },
+        "details": {
+          "type": "string",
+          "description": "Human-readable audit summary."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp written via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "action",
+        "documentId",
+        "patchId",
+        "sourceDigest",
+        "inputStateHash",
+        "outputStateHash",
+        "truthManifestHash",
+        "dofScore",
+        "bayesianFeedbackBlocked",
+        "latencyMs",
+        "details",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User workspace profile, RBAC role, and optional cloud gateway preferences."
+    },
+    "/users/{userId}/documents/{docId}": {
+      "schema": { "$ref": "#/entities/LibraryDocument" },
+      "description": "User-owned cloud-attested document records."
+    },
+    "/users/{userId}/documents/{docId}/sections/{sectionId}": {
+      "schema": { "$ref": "#/entities/DocumentSection" },
+      "description": "Bounded reflowable DITA/SSML sections with Parsing Sidecar telemetry."
+    },
+    "/users/{userId}/documents/{docId}/triples/{tripleId}": {
+      "schema": { "$ref": "#/entities/KnowledgeTriple" },
+      "description": "SHACL-validated RDF semantic triples anchored to sections."
+    },
+    "/users/{userId}/documents/{docId}/annotations/{annotationId}": {
+      "schema": { "$ref": "#/entities/StandoffAnnotation" },
+      "description": "W3C stand-off annotations anchored to section text offsets."
+    },
+    "/users/{userId}/audit_logs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLogEntry" },
+      "description": "Immutable append-only Merkle transition and provenance audit log."
+    }
+  }
+}

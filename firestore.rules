@@ -1,0 +1,339 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global safety net: deny all unmatched reads and writes
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidTimestamp(ts) {
+      return ts is timestamp && ts <= request.time;
+    }
+
+    function isValidRole(role) {
+      return role in ['curator', 'editor', 'reader'];
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 100 &&
+             data.email is string && data.email.size() >= 3 && data.email.size() <= 200 &&
+             isValidRole(data.role) &&
+             (!('cloudRestEndpoint' in data) || data.cloudRestEndpoint == null || (data.cloudRestEndpoint is string && data.cloudRestEndpoint.size() <= 300)) &&
+             data.preferredTheme in ['system', 'light', 'dark'] &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidLibraryDocument(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.author is string && data.author.size() <= 150 &&
+             data.sourceFormat in ['PDF', 'EPUB', 'MOBI', 'OCR_IMAGE', 'MARKDOWN_DITA'] &&
+             data.ditaTopicType in ['concept', 'task', 'reference'] &&
+             data.sourceDigest is string && data.sourceDigest.size() >= 16 && data.sourceDigest.size() <= 128 &&
+             data.provenanceStatus in ['CLOUD_VERIFIED', 'PENDING_ATTESTATION', 'RESEED_REQUIRED', 'ERROR'] &&
+             data.attestedModel is string && data.attestedModel.size() >= 1 && data.attestedModel.size() <= 80 &&
+             data.truthManifestHash is string && data.truthManifestHash.size() >= 16 && data.truthManifestHash.size() <= 128 &&
+             data.merkleRootHash is string && data.merkleRootHash.size() >= 16 && data.merkleRootHash.size() <= 128 &&
+             data.shaclScore is number && data.shaclScore >= 0.0 && data.shaclScore <= 1.0 &&
+             data.dofScore is number && data.dofScore >= 0.0 && data.dofScore <= 1.0 &&
+             data.bayesianFeedbackBlocked is bool && data.bayesianFeedbackBlocked == true &&
+             data.sectionCount is int && data.sectionCount >= 0 && data.sectionCount <= 500 &&
+             data.tripleCount is int && data.tripleCount >= 0 && data.tripleCount <= 2000 &&
+             data.summary is string && data.summary.size() <= 1000 &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidDocumentSection(data, docId) {
+      return data.documentId is string && data.documentId == docId &&
+             data.orderIndex is int && data.orderIndex >= 0 && data.orderIndex <= 1000 &&
+             data.title is string && data.title.size() <= 200 &&
+             data.plainText is string && data.plainText.size() >= 1 && data.plainText.size() <= 20000 &&
+             data.ditaXml is string && data.ditaXml.size() >= 1 && data.ditaXml.size() <= 30000 &&
+             data.ssmlProsody is string && data.ssmlProsody.size() >= 1 && data.ssmlProsody.size() <= 30000 &&
+             data.urn is string && data.urn.size() >= 10 && data.urn.size() <= 150 &&
+             data.sourceSpan is string && data.sourceSpan.size() >= 1 && data.sourceSpan.size() <= 120 &&
+             data.locusChecksum is string && data.locusChecksum.size() >= 16 && data.locusChecksum.size() <= 128 &&
+             data.provenanceChainHash is string && data.provenanceChainHash.size() >= 16 && data.provenanceChainHash.size() <= 128 &&
+             data.dofScore is number && data.dofScore >= 0.0 && data.dofScore <= 1.0 &&
+             data.locusDriftDistance is number && data.locusDriftDistance >= 0.0 && data.locusDriftDistance <= 1.0 &&
+             data.reseedCount is int && data.reseedCount >= 0 && data.reseedCount <= 10 &&
+             data.sidecarStatus in ['CLOUD_LOCUS_LOCKED', 'RESEEDED', 'PENDING_CLOUD_ATTESTATION', 'FALLBACK_LITERAL'] &&
+             data.convergenceType in ['DIRECT_PROJECTION', 'CONJUNCTIVE_MERGE', 'CONDITIONAL_GUARD', 'SAFETY_OVERRIDE'] &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidKnowledgeTriple(data, docId) {
+      return data.documentId is string && data.documentId == docId &&
+             data.sectionId is string && isValidId(data.sectionId) &&
+             data.urn is string && data.urn.size() >= 10 && data.urn.size() <= 150 &&
+             data.subject is string && data.subject.size() >= 1 && data.subject.size() <= 200 &&
+             data.predicate is string && data.predicate.size() >= 1 && data.predicate.size() <= 200 &&
+             data.objectValue is string && data.objectValue.size() >= 1 && data.objectValue.size() <= 300 &&
+             data.jsonLdContext is string && data.jsonLdContext.size() >= 1 && data.jsonLdContext.size() <= 250 &&
+             data.shaclStatus in ['PASSED', 'FLAGGED'] &&
+             data.confidence is number && data.confidence >= 0.0 && data.confidence <= 1.0 &&
+             isValidTimestamp(data.createdAt);
+    }
+
+    function isValidStandoffAnnotation(data, docId) {
+      return data.documentId is string && data.documentId == docId &&
+             data.sectionId is string && isValidId(data.sectionId) &&
+             data.startOffset is int && data.startOffset >= 0 && data.startOffset <= 50000 &&
+             data.endOffset is int && data.endOffset >= data.startOffset && data.endOffset <= 50000 &&
+             data.selectedText is string && data.selectedText.size() >= 1 && data.selectedText.size() <= 1000 &&
+             data.note is string && data.note.size() <= 2000 &&
+             data.tagColor in ['TERRACOTTA', 'SAGE', 'OCHRE'] &&
+             isValidRole(data.authorRole) &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt);
+    }
+
+    function isValidAuditLogEntry(data) {
+      return data.action in [
+               'INGEST', 'CLOUD_OCR_REFLOW', 'MARKOV_CHECKPOINT',
+               'SIDECAR_CHECK', 'SIDECAR_RESEED', 'SHACL_VERIFY',
+               'PROSODY_COMPILE', 'PROVENANCE_COMMIT', 'ROLE_CHECK'
+             ] &&
+             data.documentId is string && data.documentId.size() >= 1 && data.documentId.size() <= 128 &&
+             data.patchId is string && data.patchId.size() >= 1 && data.patchId.size() <= 40 &&
+             data.sourceDigest is string && data.sourceDigest.size() <= 128 &&
+             data.inputStateHash is string && data.inputStateHash.size() >= 16 && data.inputStateHash.size() <= 128 &&
+             data.outputStateHash is string && data.outputStateHash.size() >= 16 && data.outputStateHash.size() <= 128 &&
+             data.truthManifestHash is string && data.truthManifestHash.size() >= 16 && data.truthManifestHash.size() <= 128 &&
+             data.dofScore is number && data.dofScore >= 0.0 && data.dofScore <= 1.0 &&
+             data.bayesianFeedbackBlocked is bool && data.bayesianFeedbackBlocked == true &&
+             data.latencyMs is int && data.latencyMs >= 0 && data.latencyMs <= 600000 &&
+             data.details is string && data.details.size() <= 500 &&
+             isValidTimestamp(data.createdAt);
+    }
+
+    function parentDocumentExists(userId, docId) {
+      return exists(/databases/$(database)/documents/users/$(userId)/documents/$(docId)) ||
+             existsAfter(/databases/$(database)/documents/users/$(userId)/documents/$(docId));
+    }
+
+    match /admins/{adminUid} {
+      allow get: if isSignedIn() && request.auth.uid == adminUid;
+      allow list, write: if false;
+    }
+
+    match /users/{userId} {
+      allow get: if isValidId(userId) && isOwner(userId);
+      allow list: if false;
+
+      allow create: if isValidId(userId) &&
+                       isOwner(userId) &&
+                       incoming().keys().hasAll(['userId', 'displayName', 'email', 'role', 'preferredTheme', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'displayName', 'email', 'role', 'cloudRestEndpoint', 'preferredTheme', 'createdAt', 'updatedAt']) &&
+                       incoming().role in ['curator', 'reader'] &&
+                       isValidUserProfile(incoming(), userId);
+
+      allow update: if isValidId(userId) &&
+                       isOwner(userId) &&
+                       isValidUserProfile(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       (
+                         isAdmin() ||
+                         (
+                           incoming().role == existing().role &&
+                           incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'cloudRestEndpoint', 'preferredTheme', 'updatedAt'])
+                         )
+                       );
+
+      allow delete: if isValidId(userId) && isOwner(userId);
+
+      match /documents/{docId} {
+        allow get: if isValidId(userId) && isValidId(docId) && isOwner(userId);
+        allow list: if isValidId(userId) && isOwner(userId);
+
+        allow create: if isValidId(userId) &&
+                         isValidId(docId) &&
+                         isOwner(userId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'title', 'author', 'sourceFormat', 'ditaTopicType',
+                           'sourceDigest', 'provenanceStatus', 'attestedModel',
+                           'truthManifestHash', 'merkleRootHash', 'shaclScore', 'dofScore',
+                           'bayesianFeedbackBlocked', 'sectionCount', 'tripleCount',
+                           'summary', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'title', 'author', 'sourceFormat', 'ditaTopicType',
+                           'sourceDigest', 'provenanceStatus', 'attestedModel',
+                           'truthManifestHash', 'merkleRootHash', 'shaclScore', 'dofScore',
+                           'bayesianFeedbackBlocked', 'sectionCount', 'tripleCount',
+                           'summary', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidLibraryDocument(incoming(), userId);
+
+        allow update: if isValidId(userId) &&
+                         isValidId(docId) &&
+                         isOwner(userId) &&
+                         isValidLibraryDocument(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().sourceDigest == existing().sourceDigest &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'title', 'author', 'provenanceStatus', 'attestedModel',
+                           'truthManifestHash', 'merkleRootHash', 'shaclScore', 'dofScore',
+                           'sectionCount', 'tripleCount', 'summary', 'updatedAt'
+                         ]);
+
+        allow delete: if isValidId(userId) && isValidId(docId) && isOwner(userId);
+
+        match /sections/{sectionId} {
+          allow get: if isValidId(userId) && isValidId(docId) && isValidId(sectionId) && isOwner(userId);
+          allow list: if isValidId(userId) && isValidId(docId) && isOwner(userId);
+
+          allow create: if isValidId(userId) &&
+                           isValidId(docId) &&
+                           isValidId(sectionId) &&
+                           isOwner(userId) &&
+                           incoming().keys().hasAll([
+                             'documentId', 'orderIndex', 'title', 'plainText', 'ditaXml',
+                             'ssmlProsody', 'urn', 'sourceSpan', 'locusChecksum',
+                             'provenanceChainHash', 'dofScore', 'locusDriftDistance',
+                             'reseedCount', 'sidecarStatus', 'convergenceType',
+                             'createdAt', 'updatedAt'
+                           ]) &&
+                           incoming().keys().hasOnly([
+                             'documentId', 'orderIndex', 'title', 'plainText', 'ditaXml',
+                             'ssmlProsody', 'urn', 'sourceSpan', 'locusChecksum',
+                             'provenanceChainHash', 'dofScore', 'locusDriftDistance',
+                             'reseedCount', 'sidecarStatus', 'convergenceType',
+                             'createdAt', 'updatedAt'
+                           ]) &&
+                           isValidDocumentSection(incoming(), docId) &&
+                           parentDocumentExists(userId, docId);
+
+          allow update: if isValidId(userId) &&
+                           isValidId(docId) &&
+                           isValidId(sectionId) &&
+                           isOwner(userId) &&
+                           isValidDocumentSection(incoming(), docId) &&
+                           incoming().documentId == existing().documentId &&
+                           incoming().locusChecksum == existing().locusChecksum &&
+                           incoming().createdAt == existing().createdAt &&
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'title', 'plainText', 'ditaXml', 'ssmlProsody', 'urn',
+                             'provenanceChainHash', 'dofScore', 'locusDriftDistance',
+                             'reseedCount', 'sidecarStatus', 'convergenceType', 'updatedAt'
+                           ]);
+
+          allow delete: if isValidId(userId) && isValidId(docId) && isValidId(sectionId) && isOwner(userId);
+        }
+
+        match /triples/{tripleId} {
+          allow get: if isValidId(userId) && isValidId(docId) && isValidId(tripleId) && isOwner(userId);
+          allow list: if isValidId(userId) && isValidId(docId) && isOwner(userId);
+
+          allow create: if isValidId(userId) &&
+                           isValidId(docId) &&
+                           isValidId(tripleId) &&
+                           isOwner(userId) &&
+                           incoming().keys().hasAll([
+                             'documentId', 'sectionId', 'urn', 'subject', 'predicate',
+                             'objectValue', 'jsonLdContext', 'shaclStatus', 'confidence', 'createdAt'
+                           ]) &&
+                           incoming().keys().hasOnly([
+                             'documentId', 'sectionId', 'urn', 'subject', 'predicate',
+                             'objectValue', 'jsonLdContext', 'shaclStatus', 'confidence', 'createdAt'
+                           ]) &&
+                           isValidKnowledgeTriple(incoming(), docId) &&
+                           parentDocumentExists(userId, docId);
+
+          allow update: if false;
+          allow delete: if isValidId(userId) && isValidId(docId) && isValidId(tripleId) && isOwner(userId);
+        }
+
+        match /annotations/{annotationId} {
+          allow get: if isValidId(userId) && isValidId(docId) && isValidId(annotationId) && isOwner(userId);
+          allow list: if isValidId(userId) && isValidId(docId) && isOwner(userId);
+
+          allow create: if isValidId(userId) &&
+                           isValidId(docId) &&
+                           isValidId(annotationId) &&
+                           isOwner(userId) &&
+                           incoming().keys().hasAll([
+                             'documentId', 'sectionId', 'startOffset', 'endOffset',
+                             'selectedText', 'note', 'tagColor', 'authorRole',
+                             'createdAt', 'updatedAt'
+                           ]) &&
+                           incoming().keys().hasOnly([
+                             'documentId', 'sectionId', 'startOffset', 'endOffset',
+                             'selectedText', 'note', 'tagColor', 'authorRole',
+                             'createdAt', 'updatedAt'
+                           ]) &&
+                           isValidStandoffAnnotation(incoming(), docId) &&
+                           parentDocumentExists(userId, docId);
+
+          allow update: if isValidId(userId) &&
+                           isValidId(docId) &&
+                           isValidId(annotationId) &&
+                           isOwner(userId) &&
+                           isValidStandoffAnnotation(incoming(), docId) &&
+                           incoming().documentId == existing().documentId &&
+                           incoming().sectionId == existing().sectionId &&
+                           incoming().createdAt == existing().createdAt &&
+                           incoming().diff(existing()).affectedKeys().hasOnly(['note', 'tagColor', 'updatedAt']);
+
+          allow delete: if isValidId(userId) && isValidId(docId) && isValidId(annotationId) && isOwner(userId);
+        }
+      }
+
+      // Immutable append-only provenance & Markovian transition ledger
+      match /audit_logs/{logId} {
+        allow get: if isValidId(userId) && isValidId(logId) && isOwner(userId);
+        allow list: if isValidId(userId) && isOwner(userId);
+
+        allow create: if isValidId(userId) &&
+                         isValidId(logId) &&
+                         isOwner(userId) &&
+                         incoming().keys().hasAll([
+                           'action', 'documentId', 'patchId', 'sourceDigest',
+                           'inputStateHash', 'outputStateHash', 'truthManifestHash',
+                           'dofScore', 'bayesianFeedbackBlocked', 'latencyMs',
+                           'details', 'createdAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'action', 'documentId', 'patchId', 'sourceDigest',
+                           'inputStateHash', 'outputStateHash', 'truthManifestHash',
+                           'dofScore', 'bayesianFeedbackBlocked', 'latencyMs',
+                           'details', 'createdAt'
+                         ]) &&
+                         isValidAuditLogEntry(incoming());
+
+        allow update, delete: if false;
+      }
+    }
+  }
+}
